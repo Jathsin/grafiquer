@@ -6,7 +6,7 @@ class Vector2D {
         this.x = x;
         this.y = y;
 
-    } // Close plot_perlin function
+    }
 
     mod() {
         return Math.sqrt(this.x * this.x + this.y * this.y);
@@ -21,17 +21,19 @@ class Vector2D {
 
 /* 
 PARAMETRIZED VALUES
-sw, hw := respective screen width and height
+w, h := respective screen width and height
 d := distance between points
-
-We will not traverse all pixels either. Let s be the minimum space between
-to "dots" and r their radius.
-
-s := minimum space between dots (s >= r , actual space is s'=s-r).
+s := minimum space between dots (s >= r).
 r := radius.
 */
 
-let w = 1000, h = 1000, n = 50, s = 4, r = 1.5;
+let w = window.innerWidth, h = window.innerHeight, n = 200, s = 3, r = 1;
+let d = Math.floor(w / n); 
+
+// --- Interactive points state (built once, then animated) ---
+const points = [];
+// Mouse is only "active" (i.e., applying gravity) while pressed
+const mouse = { x: 0, y: 0, down: false };
 
 /*
 The noise map is constituted by key value pairs of coordinates and their
@@ -40,14 +42,13 @@ these vectors later, bringing about the air-like movement.
 */
 
 const noise_map = new Map()
-let d = Math.floor(w / n);
 
-function built_noise_map() {
+function build_noise_map() {
     noise_map.clear();
-    for (let x = 0; x < w; x += d) {
-        // Keeps order of entry
-        for (let y = 0; y < h; y += d) {
-            // Get random unitary vector
+    // Use <= so we also generate gradients on the last lattice line at x=w and y=h
+    for (let x = 0; x <= w; x += d) {
+        for (let y = 0; y <= h; y += d) {
+            // Obtain random unitary vector
             const angle = Math.random() * 2 * Math.PI;
             const gradient = new Vector2D(Math.cos(angle), Math.sin(angle));
 
@@ -58,18 +59,21 @@ function built_noise_map() {
 
 
 /*
-Build perlin noise with my tweak:
-In my effect the perlish surface defines a probability field. That is, defines
-areas with different densities of points. It is another way of drawing texture.
-
+Build perlin noise with my tweak, where the perlish surface defines a probability field. 
+That is, defines areas with different densities of points. It is another way of drawing texture.
 Let´s use a logistic distribution (sigmoid) and tune desntity with a threshold.
-input range: [-1,1]
+
+Input range = [-1,1]
 t := threshold, usually ~ 0.5
 */
 
+let center = new Vector2D(w / 2, h / 2);
+
 function plot_perlin() {
-    for (let i = 0; i <= w; i += s) {
-        for (let j = 0; j <= h; j += s) {
+    points.length = 0; // rebuild points for the current canvas
+
+    for (let i = 0; i < w; i += s) {
+        for (let j = 0; j < h; j += s) {
 
             // current point and its lattice cell (multiples of d)
             const coord = new Vector2D(i, j);
@@ -88,18 +92,15 @@ function plot_perlin() {
             const bottom_right_grad = noise_map.get(bottom_right.toString());
 
             if (!top_left_grad || !top_right_grad || !bottom_left_grad || !bottom_right_grad) {
-                console.log("missing data");
                 continue;
             }
 
-            const dot_top_left_grad = dot_gradient(coord, top_left_grad);
-            const dot_top_right_grad = dot_gradient(coord, top_right_grad);
-            const dot_bottom_left_grad = dot_gradient(coord, bottom_left_grad);
-            const dot_bottom_right_grad = dot_gradient(coord, bottom_right_grad);
+            // Correct dot products: use the displacement from each lattice corner to coord
+            const dot_top_left_grad = dot_gradient(coord, top_left, top_left_grad);
+            const dot_top_right_grad = dot_gradient(coord, top_right, top_right_grad);
+            const dot_bottom_left_grad = dot_gradient(coord, bottom_left, bottom_left_grad);
+            const dot_bottom_right_grad = dot_gradient(coord, bottom_right, bottom_right_grad);
 
-
-
-            // then use u,v in Lerp instead of sx,sy
             const sx = (i - x0) / d;
             const sy = (j - y0) / d;
             const fade = t => t * t * t * (t * (t * 6 - 15) + 10);
@@ -110,61 +111,32 @@ function plot_perlin() {
             const noise = Lerp(v, top_interpolation, bottom_interpolation);
 
             // Map Perlin-like value -> probability and sample
-            const n = noise / d; // approx in [-1, 1]
-            const p = logistic_dist(n, { inputRange: [-1, 1], threshold: 0.5, contrast: 0.3 });
-            if (Math.random() < p) {
-                ctx.beginPath();
-                ctx.arc(i, j, r, 0, Math.PI * 2); // r is your radius
-                ctx.fillStyle = "black";          // or any color you like
-                ctx.fill();
+            const nn = noise / d; // normalization, approx in [-1, 1]
+            const p = logistic_dist(nn, { inputRange: [-1, 1], threshold: 0.3, contrast: 3 });
+
+            const to_center = new Vector2D(i / center.x - 1, j / center.y - 1);
+            const d_to_center = to_center.mod();
+
+            if (Math.random() < p *(1 - d_to_center)) {
+                points.push({
+                    x: i,
+                    y: j,
+                    ox: i,
+                    oy: j,
+                    vx: 0,
+                    vy: 0,
+                    // Close the rgba() correctly
+                    color: `rgba(${Math.floor(255 * (1 - d_to_center))}, 50, ${Math.floor(255 * d_to_center)}, 0.5)`
+                });
             }
         }
     }
 }
 
-// function update_noise_map() {
-//     noise_map.forEach(gradient => {
-//         gradient = gradient.random_rotation();
-//     });
-// }
-
-let canvas, ctx;
-window.addEventListener('DOMContentLoaded', () => {
-    canvas = document.getElementById("perlinCanvas");
-    if (!canvas) {
-        console.error("Canvas element with id 'perlinCanvas' not found.");
-        return;
-    }
-    ctx = canvas.getContext("2d");
-
-    // If the HTML sets width/height attributes, use them; otherwise keep defaults
-    // w = canvas.width || w;
-    // h = canvas.height || h;
-
-    // Recompute lattice spacing from desired number of cells n
-    d = Math.floor(w / n);
-
-    // Rebuild the noise map to match current w,h,d
-    built_noise_map();
-
-    // Clear before drawing
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Set a default fill style once (faster than per-dot)
-    ctx.fillStyle = "black";
-
-    // Draw the field
-    plot_perlin();
-});
-
-
-
-/* UTILS ----------------------------------------------------------------------
-    
------------------------------------------------------------------------------*/
-
-function dot_gradient(coord, v) {
-    return (coord.x - v.x) * v.x + (coord.y - v.y) * v.y;
+function dot_gradient(coord, latticePoint, gradient) {
+    const dx = coord.x - latticePoint.x;
+    const dy = coord.y - latticePoint.y;
+    return dx * gradient.x + dy * gradient.y;
 }
 
 function Lerp(t, a, b) {
@@ -179,7 +151,7 @@ Use a logistic (sigmoid) so you can tune density with a threshold and contrast.
 - contrast: larger -> steeper transition around threshold
 - invert: flip bright/dark regions
 */
-function logistic_dist(noiseValue, { inputRange = [-1, 1], threshold = 0.5, contrast = 6, invert = false } = {}) {
+function logistic_dist(noiseValue, { inputRange = [-1, 1], threshold, contrast, invert = false } = {}) {
     // normalize to [0,1]
     const [a, b] = inputRange;
     let v = (noiseValue - a) / (b - a);
@@ -191,3 +163,109 @@ function logistic_dist(noiseValue, { inputRange = [-1, 1], threshold = 0.5, cont
     // logistic in (0,1)
     return 1 / (1 + Math.exp(-x));
 }
+
+
+
+function step() {
+
+    ctx.fillStyle = "#f8f9ffff";
+    ctx.fillRect(0, 0, w, h);
+
+    const R = 100;        // radius of influence
+    const G = 0.5;        // gravity strength
+    const damping = 0.90; // friction
+    const spring = 0.001; // return-to-origin strength (0.001)
+    const eps = 1e-6;
+
+    for (const p of points) {
+        // devuelve al origen del punto, v es un vector
+        p.vx += (p.ox - p.x) * spring;
+        p.vy += (p.oy - p.y) * spring;
+
+        // cursor gravity within radius (only while mouse is pressed)
+        if (mouse.down) {
+            const dx = mouse.x - p.x;
+            const dy = mouse.y - p.y;
+            const dist2 = dx * dx + dy * dy;
+
+            if (dist2 < R * R) {
+                const dist = Math.sqrt(dist2) + eps; // eps avoids division by 0
+                const t = 1 - dist / R;              // 1 near cursor, 0 at boundary
+                const strength = G * t * t;          // smooth falloff
+                p.vx += (dx / dist) * strength;
+                p.vy += (dy / dist) * strength;
+            }
+        }
+
+        p.vx *= damping;
+        p.vy *= damping;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // draw
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+    }
+
+    requestAnimationFrame(step);
+}
+
+
+
+
+let canvas, ctx;
+window.addEventListener('DOMContentLoaded', () => {
+    canvas = document.getElementById("perlinCanvas");
+    if (!canvas) {
+        console.error("Canvas element with id 'perlinCanvas' not found.");
+        return;
+    }
+    ctx = canvas.getContext("2d");
+
+    // Match the canvas *bitmap* size to the viewport. (CSS size alone is not enough.)
+    canvas.width = w;
+    canvas.height = h;
+
+    // Cursor tracking for interactive gravity
+    function updateMousePos(e) {
+        // mouse position reltive to canvas
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+    }
+
+    canvas.addEventListener("mousemove", (e) => {
+        updateMousePos(e);
+    });
+
+    canvas.addEventListener("mousedown", (e) => {
+        updateMousePos(e);
+        mouse.down = true;
+    });
+
+    // Use window so releasing outside the canvas still stops gravity
+    window.addEventListener("mouseup", () => {
+        mouse.down = false;
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+        mouse.down = false;
+    });
+
+    // Update derived values if viewport changes
+    center = new Vector2D(w / 2, h / 2);
+    d = Math.floor(w / n);
+
+    // Rebuild the noise map to match current w,h,d
+    build_noise_map();
+
+    // Clear before drawing
+    ctx.clearRect(0, 0, w, h);
+
+
+    // Build the point field once, then animate it
+    plot_perlin();
+    requestAnimationFrame(step);
+});

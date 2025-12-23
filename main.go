@@ -2,62 +2,27 @@ package main
 
 import (
 	"context"
-	"html/template"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/a-h/templ"
 	"github.com/google/uuid"
 )
 
 var log *slog.Logger
 
-type App struct {
-	T Templates
-}
-
-// Templates utils
-
-type Templates struct {
-	templates *template.Template
-}
-
-func (t *Templates) Render(w io.Writer, name string, data interface{}) error {
-	return t.templates.ExecuteTemplate(w, name, data)
-}
-
-// Add functionalities
-func newTemplate() *Templates {
-	tmpl := template.New("layout").Funcs(template.FuncMap{
-		"add": func(a, b int) int {
-			return a + b
-		},
-		"mult": func(a float64, b float64) float64 {
-			return a * b
-		},
-	})
-	return &Templates{
-		templates: template.Must(tmpl.ParseGlob("templates/*.html")),
-	}
-}
-
 func main() {
 
-	// Init log
 	log = slog.New(slog.NewJSONHandler(os.Stdout, nil))
-
-	// Build app template
-	app := App{*newTemplate()}
 
 	mux := http.NewServeMux()
 
 	// Hypermedia API
 
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-
-	mux.HandleFunc("GET /", app.landing_handler)
+	mux.HandleFunc("GET /", landing_handler)
 
 	// Build server
 	server := http.Server{
@@ -72,26 +37,17 @@ func main() {
 	}
 }
 
-// Hypermedia API
+// ---------------------------- Hypermedia API -----------------------------
 
-func (app *App) landing_handler(w http.ResponseWriter, r *http.Request) {
-	err := app.T.Render(w, "landing", nil)
-
-	if err != nil {
-		http.Error(w, "Error rendering page", http.StatusInternalServerError)
-		log.Error("landing_handler: error in app.T.Render()", "error", err)
-		return
-	}
+func landing_handler(w http.ResponseWriter, r *http.Request) {
+	templ.Handler(layout(perlin())).ServeHTTP(w, r)
 }
 
-// UTILS -----------------------------------------------------------------------
-
-// Passed to mux
 func logging(f http.Handler) http.HandlerFunc {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id := uuid.New().String()
 
+		id := uuid.New().String()
 		request_log := log.With("request_id", id)
 		request_log.Info("REQUEST",
 			"method", r.Method,

@@ -1,0 +1,25 @@
+package main
+
+templ layout(c templ.Component) {
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8" />
+        <!-- static files -->
+        <script defer src="./static/scripts/perlin.js"></script>
+        <link rel="stylesheet" href="./static/style.css" />
+
+        <!-- tailwind -->
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    </head>
+
+    <body>
+        @c
+        <footer></footer>
+    </body>
+    </html>
+}
+
+templ perlin() {
+    <canvas id="perlinCanvas" width="1000" height="1000"></canvas>
+}
