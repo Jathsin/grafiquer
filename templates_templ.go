@@ -5,12 +5,10 @@ package main
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import (
-	"github.com/a-h/templ"
-	templruntime "github.com/a-h/templ/runtime"
-)
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
 
-func layout(c templ.Component) templ.Component {
+func layout(canvas templ.Component, nav_bar templ.Component, content templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -31,15 +29,31 @@ func layout(c templ.Component) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html><head><meta charset=\"utf-8\"><!-- static files --><script defer src=\"./static/scripts/perlin.js\"></script><link rel=\"stylesheet\" href=\"./static/style.css\"><!-- tailwind --><script src=\"https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4\"></script></head><body>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html><head><meta charset=\"utf-8\"><!-- static files --><script defer src=\"/static/scripts/perlin.js\"></script><script defer src=\"/static/scripts/logic.js\"></script><link rel=\"stylesheet\" href=\"/static/style.css\"><!-- htmx --><script src=\"/static/scripts/htmx.js\"></script><!-- tailwind --><script src=\"https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4\"></script><!-- fonts --><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Jersey+10&family=Libre+Baskerville:ital,wght@0,400..700;1,400..700&display=swap\" rel=\"stylesheet\"></head><body class=\"relative bg-[var(--primary)] flex flex-col\" hx-boost=\"true\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = c.Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = nav_bar.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<footer></footer></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<main id=\"main\" class=\"page-fade\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if canvas != nil {
+			templ_7745c5c3_Err = canvas.Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if content != nil {
+			templ_7745c5c3_Err = content.Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</main><footer class=\"fixed bottom-4 left-1/2 -translate-x-1/2 font-['Jersey_10'] text-[var(--text_2)]/50  text-lg select-none\">crafted by the grafiquer</footer></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -68,7 +82,65 @@ func perlin() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<canvas id=\"perlinCanvas\" width=\"1000\" height=\"1000\"></canvas>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Scrollable canvas container --><div class=\"relative w-full h-[100vh] overflow-y-scroll z-0\"><canvas id=\"perlinCanvas\" class=\"sticky top-0 w-screen h-screen\"></canvas><div class=\"pointer-events-none absolute bottom-20 items-end flex flex-col inline-flex w-fit right-30 text-[var(--text_2)]/60 text-xl select-none gap-y-1\"><button class=\"pointer-events-auto flex flex-row gap-2 items-center cursor-pointer accordion\"><div class=\"w-fit px-2 font-['Jersey_10'] border-2 border-[var(--text_2)]/60\">\"THE PERLIN-SYSTEM\" </div><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-5 transition-transform duration-700 ease-in-out\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M12 4.5v15m7.5-7.5h-15\"></path></svg></button><div class=\"pointer-events-auto panel text-[var(--text_2)]/70 text-[14px] mr-7 self-end text-right font-['Libre_Baskerville'] leading-relaxed w-[25%] panel-fade\"><p><i>The Perlin–System</i> is a generative field built from controlled randomness. Using gradient noise as a probability surface, points emerge, dissolve, and respond to interaction — forming a living texture rather than a static image.</p><p>The system blends mathematical smoothness with organic density, exploring how simple rules can produce complexity, balance, and motion. What you see is not drawn — it is <i>sampled</i>.</p><br></div><p class=\"pointer-events-auto text-[14px] uppercase cursor-pointer hover:underline mr-7\"><a href=\"https://github.com/Jathsin/Ithaca/blob/main/static/scripts/perlin.js\">Check the code</a></p></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func nav_bar() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Decorative SVG in top-left corner --><div hx-get=\"/grafiquer\" hx-target=\"#main\" hx-swap=\"innerHTML swap:100ms settle:100ms\" class=\"fixed top-3 left-6 z-40 text-[var(--logo)] hover:text-[var(--text_2)] transition-colors duration-80 ease-in cursor-pointer\"><svg width=\"30\" height=\"50\" viewBox=\"0 0 791 927\" fill=\"var(--primary)\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M259.608 71.5029C276.84 65.6359 365.498 62.5029 380.108 119.003C387.608 148.003 385.265 202.211 352.108 244.503C303.108 307.003 249.108 293.503 221.608 280.503C203.108 271.757 154.553 245.398 157.66 174.117C160.766 102.837 229.464 72.4002 259.608 71.5029Z\" stroke=\"currentColor\" stroke-width=\"95\"></path> <path d=\"M393.608 47.5029C402.608 149.17 409.401 453.136 380.11 550.503C326.111 730.003 241.609 879.503 124.611 879.503C27.6099 879.503 13.191 740.275 133.108 596.503C226.108 485.003 155.176 570.053 234.608 482.503C278.61 434.003 418.308 349.703 513.108 406.503C607.908 463.303 688.278 383.67 704.111 347.503\" stroke=\"currentColor\" stroke-width=\"95\" stroke-linecap=\"round\"></path> <path d=\"M743.466 353.599L667.952 546.697\" stroke=\"currentColor\" stroke-width=\"95\" stroke-linecap=\"round\"></path> <path d=\"M743.05 344.136L604.108 278.654\" stroke=\"currentColor\" stroke-width=\"95\" stroke-linecap=\"round\"></path></svg></div><div hx-push-url=\"true\" class=\"fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center py-2 px-5 bg-[var(--text_1)]/55 backdrop-blur-sm backdrop-saturate-110\n        text-[var(--primary)] text-xl font-['Jersey_10'] rounded-full select-none\"><!-- Left slot (fixed width so center item stays centered) --><div class=\"w-16 text-right hover:underline transition-colors duration-150 ease-in cursor-pointer glow\">artículos</div><!-- Center slot --><div class=\"mx-4 hover:underline transition-colors duration-150 ease-in cursor-pointer glow\">proyectos</div><!-- Right slot (fixed width so center item stays centered) --><div hx-get=\"/about\" hx-target=\"#main\" hx-swap=\"innerHTML swap:100ms settle:100ms\" class=\"w-12 text-left hover:underline transition-colors duration-150 ease-in cursor-pointer glow\">about</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func content_about() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<section class=\"mx-auto max-w-3xl font-['Libre_Baskerville'] text-[13px] pt-20 pb-30\"><h1>About</h1><p id=\"content\">I’m <strong>Juan Miguel Reyes</strong>, a Computer Science student at the <strong>University of Malaga</strong> and a junior developer intern. <em>Grafiquer</em> is where I explore the intersection between <em>mathematics, programming, and visual form</em>.</p><p id=\"content\">I’m interested in building <em>procedural, natural animations</em> with code — systems that evolve, react, and emerge from simple rules. Beyond the visuals, I care about understanding and explaining the mathematics behind them, and making that knowledge accessible through articles and tutorials. At its core, this is about the link between <em>math and art</em>.</p><h2>Why this site exists</h2><p id=\"content\">I created this space for three reasons: to specialise in computer graphics and generative systems, to put into practice what I learn both at university and at work, and to slowly build a community around these ideas.</p><p id=\"content\">A more personal motivation is a reaction against the <em>noise of contemporary design</em>. Too many interfaces ask for attention, explanation, or conversion. Here, I try to keep things <em>simple, quiet, and curious</em> — letting systems speak before words do.</p><h2>What you’ll find here</h2><p id=\"content\">There are two main types of content:</p><ul><li><strong>Graphic projects</strong> — generative systems and visual experiments, often accompanied by technical breakdowns and tutorials explaining how they are built.</li><li><strong>Articles on graphics and mathematics</strong> — divulgation pieces, references to papers, and explanations of concepts related to computer graphics and procedural generation.</li></ul><p id=\"content\">This is a learning space as much as a publishing one.</p><h2>Who this is for</h2><p id=\"content\">This site is for artists of the new century who want to explore technical and mathematical fields, and for engineering and high-school students curious about graphics and generative systems. Some content will get technical by necessity.</p><h2>A note on experience</h2><p id=\"content\">I’m still a student, learning as I go. I don’t claim authority or recognition in the field — only honesty about the process and care for the craft.</p><p id=\"content\">If you want to follow the work more closely, you can find me here:</p><ul><li><a href=\"https://github.com/Jathsin\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub</a></li><li><a href=\"https://www.linkedin.com/in/juan-miguel-reyes-pérez-5571b2230\" target=\"_blank\" rel=\"noopener noreferrer\">LinkedIn</a></li></ul></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -27,8 +27,30 @@ s := minimum space between dots (s >= r).
 r := radius.
 */
 
-let w = window.innerWidth, h = window.innerHeight, n = 200, s = 3, r = 1;
+let w = window.innerWidth, h = window.innerHeight, n = 100, s = 2, r = 1.1;
+const eps = 1e-6; // Small epsilon used across functions to avoid division by zero
 let d = Math.floor(w / n); 
+
+
+// ---- Animation loop state (prevents double RAF loops on history restore) ----
+let rafId = null;
+let running = false;
+let lastFrameT = 0;
+
+function startLoop() {
+    if (running) return;
+    running = true;
+    lastFrameT = 0;
+    rafId = requestAnimationFrame(step);
+}
+
+function stopLoop() {
+    running = false;
+    if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+    }
+}
 
 // --- Interactive points state (built once, then animated) ---
 const points = [];
@@ -37,12 +59,9 @@ const mouse = { x: 0, y: 0, down: false };
 
 /*
 The noise map is constituted by key value pairs of coordinates and their
-associated gradient vector. We will keep its state in order to rotate
-these vectors later, bringing about the air-like movement.
+associated gradient vector.
 */
-
 const noise_map = new Map()
-
 function build_noise_map() {
     noise_map.clear();
     // Use <= so we also generate gradients on the last lattice line at x=w and y=h
@@ -56,7 +75,6 @@ function build_noise_map() {
         }
     }
 }
-
 
 /*
 Build perlin noise with my tweak, where the perlish surface defines a probability field. 
@@ -117,7 +135,7 @@ function plot_perlin() {
             const to_center = new Vector2D(i / center.x - 1, j / center.y - 1);
             const d_to_center = to_center.mod();
 
-            if (Math.random() < p *(1 - d_to_center)) {
+            if (Math.random() < p*(1-d_to_center)) {
                 points.push({
                     x: i,
                     y: j,
@@ -125,8 +143,8 @@ function plot_perlin() {
                     oy: j,
                     vx: 0,
                     vy: 0,
-                    // Close the rgba() correctly
-                    color: `rgba(${Math.floor(255 * (1 - d_to_center))}, 50, ${Math.floor(255 * d_to_center)}, 0.5)`
+                    color: `rgba(${Math.floor(255 * (1 - d_to_center))}, 50, ${Math.floor(255 * d_to_center)}, ${0.4*(1-d_to_center) + 0.3})`,
+                    R: r/(d_to_center + 1)
                 });
             }
         }
@@ -164,18 +182,41 @@ function logistic_dist(noiseValue, { inputRange = [-1, 1], threshold, contrast, 
     return 1 / (1 + Math.exp(-x));
 }
 
+let primary_rgba = "";
 
+function step(t) {
+    if (!running) return;
 
-function step() {
+    if (!lastFrameT) lastFrameT = t;
+    // Clamp large gaps (e.g., when returning from another page) to avoid visible jumps
+    const dt = Math.min(t - lastFrameT, 34);
+    lastFrameT = t;
 
-    ctx.fillStyle = "#f8f9ffff";
+    ctx.fillStyle = primary_rgba;
     ctx.fillRect(0, 0, w, h);
 
-    const R = 100;        // radius of influence
+    const R = 200;        // radius of influence
     const G = 0.5;        // gravity strength
     const damping = 0.90; // friction
     const spring = 0.001; // return-to-origin strength (0.001)
-    const eps = 1e-6;
+
+    const scale = 0.85; // <—— make figure smaller (0.5–0.8 are good values)
+
+    ctx.save();
+
+    // move origin to center
+    ctx.translate(center.x, center.y);
+
+    // scale everything
+    ctx.scale(scale, scale);
+
+    // move origin back
+    ctx.translate(-center.x, -center.y);
+
+    // Mouse is in screen (post-transform) coordinates. Convert to world coordinates
+    // so forces line up with the scaled drawing.
+    const mouseWorldX = center.x + (mouse.x - center.x) / scale;
+    const mouseWorldY = center.y + (mouse.y - center.y) / scale;
 
     for (const p of points) {
         // devuelve al origen del punto, v es un vector
@@ -184,8 +225,8 @@ function step() {
 
         // cursor gravity within radius (only while mouse is pressed)
         if (mouse.down) {
-            const dx = mouse.x - p.x;
-            const dy = mouse.y - p.y;
+            const dx = mouseWorldX - p.x;
+            const dy = mouseWorldY - p.y;
             const dist2 = dx * dx + dy * dy;
 
             if (dist2 < R * R) {
@@ -204,29 +245,64 @@ function step() {
 
         // draw
         ctx.beginPath();
-        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.R, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.fill();
+
     }
 
-    requestAnimationFrame(step);
+    ctx.restore();
+    const scrollFactor = scrollY * 0.002;
+    // (scrollFactor is currently unused, keep it if you plan to drive the field with scroll)
+
+    rafId = requestAnimationFrame(step);
 }
 
 
-
-
 let canvas, ctx;
-window.addEventListener('DOMContentLoaded', () => {
+
+// TODO: understand all this
+function resizeCanvasToDisplaySize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+
+    // Use CSS pixel dimensions for simulation space
+    w = Math.round(rect.width);
+    h = Math.round(rect.height);
+
+    // Match the internal bitmap to device pixels for sharp rendering
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+
+    // Draw using CSS pixel coordinates
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    center = new Vector2D(w / 2, h / 2);
+    d = Math.floor(w / n);
+}
+
+function init_perlin() {
     canvas = document.getElementById("perlinCanvas");
     if (!canvas) {
         console.error("Canvas element with id 'perlinCanvas' not found.");
         return;
     }
-    ctx = canvas.getContext("2d");
 
-    // Match the canvas *bitmap* size to the viewport. (CSS size alone is not enough.)
-    canvas.width = w;
-    canvas.height = h;
+    // Read CSS variable after styles are loaded
+    primary_rgba = getComputedStyle(document.documentElement)
+        .getPropertyValue('--primary')
+        .trim() || "#ffffff";
+
+    // Guard against double init (htmx history restore / pageshow)
+    if (canvas.dataset.perlinInit === "1") {
+        // Still ensure correct sizing + running loop
+        resizeCanvasToDisplaySize();
+        startLoop();
+        return;
+    }
+    canvas.dataset.perlinInit = "1";
+    ctx = canvas.getContext("2d");
+    resizeCanvasToDisplaySize();
 
     // Cursor tracking for interactive gravity
     function updateMousePos(e) {
@@ -254,9 +330,7 @@ window.addEventListener('DOMContentLoaded', () => {
         mouse.down = false;
     });
 
-    // Update derived values if viewport changes
-    center = new Vector2D(w / 2, h / 2);
-    d = Math.floor(w / n);
+    // This should only be done once per cycle
 
     // Rebuild the noise map to match current w,h,d
     build_noise_map();
@@ -264,8 +338,75 @@ window.addEventListener('DOMContentLoaded', () => {
     // Clear before drawing
     ctx.clearRect(0, 0, w, h);
 
-
     // Build the point field once, then animate it
     plot_perlin();
-    requestAnimationFrame(step);
+    startLoop();
+}
+
+// Initial load
+window.addEventListener("DOMContentLoaded", () => {
+  requestAnimationFrame(() => requestAnimationFrame(fadeInMain));
+  init_perlin();
 });
+
+// Stop rendering when navigating away (prevents duplicate loops)
+window.addEventListener("pagehide", stopLoop);
+
+// Back/forward cache restore
+window.addEventListener("pageshow", () => {
+    // Allow a clean re-init if the element is restored
+    const c = document.getElementById("perlinCanvas");
+    if (c) c.dataset.perlinInit = "";
+    init_perlin();
+});
+
+// htmx lifecycle (swap away / restore)
+document.body.addEventListener("htmx:beforeSwap", () => {
+  stopLoop();
+  const c = document.getElementById("perlinCanvas");
+  if (c) c.dataset.perlinInit = "";
+});
+
+document.body.addEventListener("htmx:historyRestore", () => {
+    const c = document.getElementById("perlinCanvas");
+    if (c) c.dataset.perlinInit = "";
+    init_perlin();
+});
+
+// document.body.addEventListener("htmx:afterSwap", () => {
+//     const c = document.getElementById("perlinCanvas");
+//     if (c) {
+//         c.dataset.perlinInit = "";
+//         init_perlin();
+//     }
+// });
+
+// afterSettle provides time for the browser to compute final layout
+document.body.addEventListener("htmx:afterSettle", () => {
+  const c = document.getElementById("perlinCanvas");
+  if (!c) return;
+  c.dataset.perlinInit = ""; // force init path
+  init_perlin();
+});
+
+// Keep canvas crisp if the viewport changes
+window.addEventListener("resize", () => {
+    if (!canvas || !ctx) return;
+    resizeCanvasToDisplaySize();
+    build_noise_map();
+    plot_perlin();
+});
+
+
+let scrollY = 0;
+window.addEventListener("scroll", () => {
+  scrollY = window.scrollY;
+});
+
+
+function fadeInMain() {
+  const main = document.getElementById("main");
+  if (!main) return;
+  main.classList.remove("opacity-0");
+  main.classList.add("opacity-100");
+}
