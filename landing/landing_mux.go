@@ -13,7 +13,7 @@ func Get_mux() (*http.ServeMux, error) {
 	mux := http.NewServeMux()
 
 	// Redirect to landing by default
-	mux.HandleFunc("GET /grafiquer", landing_handler)
+	mux.HandleFunc("GET /", landing_handler)
 
 	return mux, nil
 }

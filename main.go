@@ -32,17 +32,9 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/grafiquer", http.StatusMovedPermanently)
-	})
+	mux.Handle("GET /{$}", landing_mux)
 
-	mux.Handle("GET /grafiquer", landing_mux)
-
-	mux.HandleFunc("GET /grafiquer/{$}", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/grafiquer", http.StatusMovedPermanently)
-	})
-
-	mux.Handle("GET /grafiquer/", http.StripPrefix("/grafiquer", web_mux))
+	mux.Handle("GET /{path...}", web_mux)
 
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
