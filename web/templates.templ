@@ -1,0 +1,186 @@
+package web
+
+templ layout(canvas templ.Component, nav_bar templ.Component, content templ.Component) {
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8" />
+        <!-- static files -->
+        <script defer src="/static/scripts/perlin.js"></script>
+        <script defer src="/static/scripts/logic.js"></script>
+
+        <link rel="stylesheet" href="/static/style.css" />
+
+        <!-- htmx -->
+        <script src="/static/scripts/htmx.js"></script>
+
+        <!-- tailwind -->
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+        <!-- fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Libre+Baskerville:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    </head>
+
+    <body class="relative bg-[var(--primary)] flex flex-col" hx-boost="true"> // puts everything into a single stacking context
+        @nav_bar
+        <main id="main" class="page-fade">
+            if (canvas != nil) {
+                @canvas
+            }
+            if (content != nil) {
+                @content
+            }
+        </main>
+        <footer class="fixed bottom-4 left-1/2 -translate-x-1/2 font-['Jersey_10'] text-[var(--text_2)]/50  text-lg select-none">
+            crafted by the grafiquer
+        </footer>
+    </body>
+    </html>
+}
+
+
+
+templ nav_bar(){
+    <!-- Decorative SVG in top-left corner -->
+    <div hx-get="/grafiquer" hx-target="#main" hx-swap="innerHTML swap:100ms settle:100ms" class="fixed top-3 left-6 z-40 text-[var(--logo)] hover:text-[var(--text_2)] transition-colors duration-80 ease-in cursor-pointer">
+        <svg width="30" height="50" viewBox="0 0 791 927" fill="var(--primary)" xmlns="http://www.w3.org/2000/svg">
+            <path d="M259.608 71.5029C276.84 65.6359 365.498 62.5029 380.108 119.003C387.608 148.003 385.265 202.211 352.108 244.503C303.108 307.003 249.108 293.503 221.608 280.503C203.108 271.757 154.553 245.398 157.66 174.117C160.766 102.837 229.464 72.4002 259.608 71.5029Z" stroke="currentColor" stroke-width="95"/>
+            <path d="M393.608 47.5029C402.608 149.17 409.401 453.136 380.11 550.503C326.111 730.003 241.609 879.503 124.611 879.503C27.6099 879.503 13.191 740.275 133.108 596.503C226.108 485.003 155.176 570.053 234.608 482.503C278.61 434.003 418.308 349.703 513.108 406.503C607.908 463.303 688.278 383.67 704.111 347.503" stroke="currentColor" stroke-width="95" stroke-linecap="round"/>
+            <path d="M743.466 353.599L667.952 546.697" stroke="currentColor" stroke-width="95" stroke-linecap="round"/>
+            <path d="M743.05 344.136L604.108 278.654" stroke="currentColor" stroke-width="95" stroke-linecap="round"/>
+        </svg>
+    </div>
+    <div hx-push-url="true"
+        class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center py-2 px-5 bg-[var(--text_1)]/55 backdrop-blur-sm backdrop-saturate-110
+        text-[var(--primary)] text-xl font-['Jersey_10'] rounded-full select-none">
+
+        <!-- Left slot (fixed width so center item stays centered) -->
+        <div class="w-16 text-right hover:underline transition-colors duration-150 ease-in cursor-pointer glow">
+            artículos
+        </div>
+
+        <!-- Center slot -->
+        <div class="mx-4 hover:underline transition-colors duration-150 ease-in cursor-pointer glow">
+            proyectos
+        </div>
+
+        <!-- Right slot (fixed width so center item stays centered) -->
+        <div hx-get="/about" hx-target="#main" hx-swap="innerHTML swap:100ms settle:100ms"
+            class="w-12 text-left hover:underline transition-colors duration-150 ease-in cursor-pointer glow">
+            about
+        </div>
+    </div>
+}
+
+
+templ content_about(){
+    <section class="mx-auto max-w-3xl font-['Libre_Baskerville'] text-[13px] pt-20 pb-30">
+        <h1>About</h1>
+        <p id="content">
+            I’m <strong>Juan Miguel Reyes</strong>, a Computer Science student at the
+            <strong>University of Malaga</strong> and a junior developer intern.
+            <em>Grafiquer</em> is where I explore the intersection between
+            <em>mathematics, programming, and visual form</em>.
+        </p>
+
+        <p id="content">
+            I’m interested in building <em>procedural, natural animations</em> with code —
+            systems that evolve, react, and emerge from simple rules.
+            Beyond the visuals, I care about understanding and explaining
+            the mathematics behind them, and making that knowledge accessible
+            through articles and tutorials.
+            At its core, this is about the link between <em>math and art</em>.
+        </p>
+
+        <h2>Why this site exists</h2>
+
+        <p id="content">
+            I created this space for three reasons:
+            to specialise in computer graphics and generative systems,
+            to put into practice what I learn both at university and at work,
+            and to slowly build a community around these ideas.
+        </p>
+
+        <p id="content">
+            A more personal motivation is a reaction against the
+            <em>noise of contemporary design</em>.
+            Too many interfaces ask for attention, explanation, or conversion.
+            Here, I try to keep things <em>simple, quiet, and curious</em> —
+            letting systems speak before words do.
+        </p>
+
+        <h2>What you’ll find here</h2>
+
+        <p id="content">
+            There are two main types of content:
+        </p>
+
+        <ul>
+            <li>
+            <strong>Graphic projects</strong> — generative systems and visual experiments,
+            often accompanied by technical breakdowns and tutorials explaining how they are built.
+            </li>
+            <li>
+            <strong>Articles on graphics and mathematics</strong> — divulgation pieces,
+            references to papers, and explanations of concepts related to computer graphics
+            and procedural generation.
+            </li>
+        </ul>
+
+        <p id="content">
+            This is a learning space as much as a publishing one.
+        </p>
+
+        <h2>Who this is for</h2>
+
+        <p id="content">
+            This site is for artists of the new century who want to explore
+            technical and mathematical fields, and for engineering and
+            high-school students curious about graphics and generative systems.
+            Some content will get technical by necessity.
+        </p>
+
+        <h2>A note on experience</h2>
+
+        <p id="content">
+            I’m still a student, learning as I go.
+            I don’t claim authority or recognition in the field —
+            only honesty about the process and care for the craft.
+        </p>
+
+        <p id="content">
+            If you want to follow the work more closely, you can find me here:
+        </p>
+
+        <ul class="flex flex-col items-center gap-y-5 pt-6">
+            <li>
+            <a href="https://github.com/Jathsin" target="_blank" rel="noopener noreferrer" class="flex flex-row align-center gap-x-5">
+                GitHub
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+                </svg>
+            </a>
+            </li>
+            <li>
+            <a href="https://www.linkedin.com/in/juan-miguel-reyes-pérez-5571b2230"
+                target="_blank" rel="noopener noreferrer" class="flex flex-row align-center gap-x-5">
+                LinkedIn
+                <svg height="30" width="30" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+	            viewBox="0 0 382 382" xml:space="preserve">
+                    <path style="fill:currentColor;" d="M347.445,0H34.555C15.471,0,0,15.471,0,34.555v312.889C0,366.529,15.471,382,34.555,382h312.889
+                        C366.529,382,382,366.529,382,347.444V34.555C382,15.471,366.529,0,347.445,0z M118.207,329.844c0,5.554-4.502,10.056-10.056,10.056
+                        H65.345c-5.554,0-10.056-4.502-10.056-10.056V150.403c0-5.554,4.502-10.056,10.056-10.056h42.806
+                        c5.554,0,10.056,4.502,10.056,10.056V329.844z M86.748,123.432c-22.459,0-40.666-18.207-40.666-40.666S64.289,42.1,86.748,42.1
+                        s40.666,18.207,40.666,40.666S109.208,123.432,86.748,123.432z M341.91,330.654c0,5.106-4.14,9.246-9.246,9.246H286.73
+                        c-5.106,0-9.246-4.14-9.246-9.246v-84.168c0-12.556,3.683-55.021-32.813-55.021c-28.309,0-34.051,29.066-35.204,42.11v97.079
+                        c0,5.106-4.139,9.246-9.246,9.246h-44.426c-5.106,0-9.246-4.14-9.246-9.246V149.593c0-5.106,4.14-9.246,9.246-9.246h44.426
+                        c5.106,0,9.246,4.14,9.246,9.246v15.655c10.497-15.753,26.097-27.912,59.312-27.912c73.552,0,73.131,68.716,73.131,106.472
+                        L341.91,330.654L341.91,330.654z"/>
+                </svg>
+            </a>
+            </li>
+        </ul>
+    </section>
+}

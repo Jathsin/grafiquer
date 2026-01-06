@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"jathsin/landing"
+	"jathsin/web"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/a-h/templ"
 	"github.com/google/uuid"
 )
 
@@ -17,15 +18,33 @@ func main() {
 
 	log = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
+	landing_mux, err := landing.Get_mux()
+	if err != nil {
+		log.Error("main: error in landing.Get_mux()", "error", err)
+		os.Exit(1)
+	}
+
+	web_mux, err := web.Get_mux()
+	if err != nil {
+		log.Error("main: error in web.Get_mux()", "error", err)
+		os.Exit(1)
+	}
+
 	mux := http.NewServeMux()
 
-	// Hypermedia API
+	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/grafiquer", http.StatusMovedPermanently)
+	})
 
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+	mux.Handle("GET /grafiquer", landing_mux)
 
-	mux.HandleFunc("GET /grafiquer", landing_handler)
+	mux.HandleFunc("GET /grafiquer/{$}", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/grafiquer", http.StatusMovedPermanently)
+	})
 
-	mux.HandleFunc("GET /about", about_handler)
+	mux.Handle("GET /grafiquer/", http.StripPrefix("/grafiquer", web_mux))
+
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	// Build server
 	server := http.Server{
@@ -34,28 +53,11 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 		Handler:      logging(mux),
 	}
-	err := server.ListenAndServe()
+
+	err = server.ListenAndServe()
 	if err != nil {
 		log.Error("Error in server.ListenAndServe()", "error", err)
 	}
-}
-
-// ---------------------------- Hypermedia API -----------------------------
-
-func landing_handler(w http.ResponseWriter, r *http.Request) {
-	if isHTMX(r) {
-		templ.Handler(perlin()).ServeHTTP(w, r)
-		return
-	}
-	templ.Handler(layout(perlin(), nav_bar(), nil)).ServeHTTP(w, r)
-}
-
-func about_handler(w http.ResponseWriter, r *http.Request) {
-	if isHTMX(r) {
-		templ.Handler(content_about()).ServeHTTP(w, r)
-		return
-	}
-	templ.Handler(layout(nil, nav_bar(), content_about())).ServeHTTP(w, r)
 }
 
 func logging(f http.Handler) http.HandlerFunc {

@@ -1,4 +1,5 @@
 /* Define design variables to keep consistency */
+/* affect the whole interface */
 :root {
     /* margins */
     --margin-xxs: .25rem;

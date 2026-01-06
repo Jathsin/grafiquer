@@ -1,28 +1,3 @@
-// console.log("Accordion script loaded");
-
-// const accordions = document.querySelectorAll(".accordion");
-
-// accordions.forEach((accordion) => {
-//   accordion.addEventListener("click", () => {
-//     const parent = accordion.parentElement;
-//     const panel = parent.querySelector(".panel");
-//     const icon = accordion.querySelector("svg");
-
-//     if (!panel) return;
-
-//     // Toggle panel visibility
-//     const isOpen = panel.style.maxHeight;
-
-//     if (isOpen) {
-//       panel.style.maxHeight = null;
-//       if (icon) icon.style.transform = "rotate(0deg)";
-//     } else {
-//       panel.style.maxHeight = panel.scrollHeight + "px";
-//       if (icon) icon.style.transform = "rotate(90deg)";
-//     }
-//   });
-// });
-
 
 // Use event delegation so the accordion keeps working across HTMX swaps
 // and also when the browser restores the page from the back/forward cache.
