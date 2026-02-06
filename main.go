@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"jathsin/auth"
 	"jathsin/landing"
 	"jathsin/web"
 	"log/slog"
@@ -12,21 +13,29 @@ import (
 	"github.com/google/uuid"
 )
 
-var log *slog.Logger
+type ctx_key_logger struct{}
+
+var logger *slog.Logger
 
 func main() {
 
-	log = slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	landing_mux, err := landing.Get_mux()
 	if err != nil {
-		log.Error("main: error in landing.Get_mux()", "error", err)
+		logger.Error("main: error in landing.Get_mux()", "error", err)
 		os.Exit(1)
 	}
 
 	web_mux, err := web.Get_mux()
 	if err != nil {
-		log.Error("main: error in web.Get_mux()", "error", err)
+		logger.Error("main: error in web.Get_mux()", "error", err)
+		os.Exit(1)
+	}
+
+	auth_mux, err := auth.Get_mux()
+	if err != nil {
+		logger.Error("main: error in auth.Get_mux()", "error", err)
 		os.Exit(1)
 	}
 
@@ -34,9 +43,15 @@ func main() {
 
 	mux.Handle("GET /{$}", landing_mux)
 
-	mux.Handle("GET /{path...}", web_mux)
+	mux.Handle("GET /", web_mux)
 
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
+	// AUTH
+	// We only handle these kind of requests, being this explicit prevents
+	// the server from processing malicious requests (DELETE, PUT...)
+	mux.Handle("GET /auth/",  http.StripPrefix("/auth", auth_mux))
+	mux.Handle("POST /auth/",  http.StripPrefix("/auth", auth_mux))
 
 	// Build server
 	server := http.Server{
@@ -48,24 +63,24 @@ func main() {
 
 	err = server.ListenAndServe()
 	if err != nil {
-		log.Error("Error in server.ListenAndServe()", "error", err)
+		logger.Error("Error in server.ListenAndServe()", "error", err)
 	}
 }
-
-func logging(f http.Handler) http.HandlerFunc {
-
+func logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		id := uuid.New().String()
-		request_log := log.With("request_id", id)
-		request_log.Info("REQUEST",
+		requestLogger := logger.With("request_id", id)
+		requestLogger.Info("REQUEST",
 			"method", r.Method,
 			"url", r.URL.Path,
-			"address", r.RemoteAddr)
+			"address", r.RemoteAddr,
+		)
 
-		ctx := context.WithValue(r.Context(), "logs", request_log)
+		// Attatch log data to request to later use the same log id across 
+		// packages for the same request
+		ctx := context.WithValue(r.Context(), ctx_key_logger{}, requestLogger)
 		r = r.WithContext(ctx)
 
-		f.ServeHTTP(w, r)
+		next.ServeHTTP(w, r)
 	})
 }
