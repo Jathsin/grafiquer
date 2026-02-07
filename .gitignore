@@ -1,0 +1,61 @@
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ==============================
+# Temporary folders and files
+tmp/
+**/tmp/
+*.tmp
+*.log
+
+# ==============================
+# Jujutsu (jj) VCS internal data
+.jj/
+**/.jj/
+
+# ==============================
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go build directories
+bin/
+dist/
+build/
+
+# Coverage & profiling
+*.coverprofile
+coverage.out
+cpu.out
+mem.out
+
+# ==============================
+# Editor / IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==============================
+# Node / frontend artifacts (if used in projects)
+node_modules/
+dist/
+build/
+
+# ==============================
+# Environment & secrets
+.env
+.env.*
+
+# ==============================
+# Project-specific temporary assets
+projects/**/tmp/
+projects/**/build/
+projects/**/dist/

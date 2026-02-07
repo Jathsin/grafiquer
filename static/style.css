@@ -1,32 +1,31 @@
 /* Define design variables to keep consistency */
 /* affect the whole interface */
 :root {
-    /* margins */
-    --margin-xxs: .25rem;
-    --margin-xs: .5rem;
-    --margin-s: .75rem;
-    --margin-m: 1rem;
-    --margin-l: 1.25rem;
-    --margin-xl: 1.75rem;
-    --margin-xxl: 2.5rem;
+  /* margins */
+  --margin-xxs: 0.25rem;
+  --margin-xs: 0.5rem;
+  --margin-s: 0.75rem;
+  --margin-m: 1rem;
+  --margin-l: 1.25rem;
+  --margin-xl: 1.75rem;
+  --margin-xxl: 2.5rem;
 
-    /* text */
+  /* text */
 
-
-    /* colors */
-    /* bakground */
-     --primary: rgb(248, 246, 222);
-     --secondary: rgb(224, 219, 195);
-     --text_1: #202373FF;
-     --text_2:rgb(101, 65, 7);
-     --logo: rgb(175, 152, 113);
-
+  /* colors */
+  /* bakground */
+  --primary: rgb(248, 246, 222);
+  --secondary: rgb(224, 219, 195);
+  --text_1: #202373ff;
+  --text_2: rgb(101, 65, 7);
+  --logo: rgb(175, 152, 113);
 }
 
 /* Typography: About / Articles */
 
-h1, h2 {
-  font-family: 'Jersey 10', system-ui, sans-serif;
+h1,
+h2 {
+  font-family: "Jersey 10", system-ui, sans-serif;
   letter-spacing: 0.01em;
 }
 
@@ -49,8 +48,9 @@ h2 {
   margin-bottom: var(--margin-s);
 }
 
-#content, li {
-  font-family: 'Libre Baskerville', Georgia, serif;
+#content,
+li {
+  font-family: "Libre Baskerville", Georgia, serif;
   font-size: 0.96rem;
   line-height: 1.7;
   color: rgba(101, 65, 7, 0.92);
@@ -84,19 +84,19 @@ em {
 /* rgb(248, 246, 222) */
 /* rgb(101, 65, 7); */
 .glow {
-    text-shadow: 0 0 30px rgba(34, 16, 104, 0.35);
+  text-shadow: 0 0 30px rgba(34, 16, 104, 0.35);
 }
 
 /* Links inside long-form text */
 section a {
   color: rgba(32, 35, 115, 0.78);
-  text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
 }
 
 section a:hover {
   color: rgba(32, 35, 115, 0.92);
+  text-decoration: underline;
 }
 
 /* Page fade without JS: HTMX toggles .htmx-swapping / .htmx-settling on the target element */
@@ -117,7 +117,6 @@ section a:hover {
   }
 }
 
-
 /* Accordion */
 .accordion {
   transition: 0.4s;
@@ -128,4 +127,56 @@ section a:hover {
   overflow: hidden;
   max-height: 0;
   transition: max-height 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ==============================
+   Bento boxes: title + date
+   ============================== */
+
+/* Apply these classes inside each bento card */
+#bento-title {
+  font-family: "Jersey 10", system-ui, sans-serif;
+  font-size: 1.45rem;
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: rgba(32, 35, 115, 0.82);
+
+  /* spacing */
+  margin: 0;
+  margin-top: var(--margin-xs);
+  margin-left: var(--margin-s);
+  margin-right: var(--margin-s);
+}
+
+#bento-date {
+  font-size: 0.82rem;
+  line-height: 1.2;
+  color: rgba(32, 35, 115, 0.82);
+
+  /* spacing */
+  margin: 0;
+  margin-top: var(--margin-xxs);
+  margin-left: var(--margin-s);
+  margin-right: var(--margin-s);
+}
+
+/* Optional: if you wrap title+date in a header area */
+#bento-header {
+  padding-top: var(--margin-xs);
+  padding-bottom: var(--margin-xs);
+}
+
+/* Components */
+.slider {
+  z-index: 10;
+  width: 260px;
+}
+
+#tag {
+  left: 20px;
+  z-index: 10;
+  width: 260px;
+  padding: 6px 8px;
+  font-size: 14px;
 }

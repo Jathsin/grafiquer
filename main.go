@@ -4,7 +4,9 @@ import (
 	"context"
 	"jathsin/auth"
 	"jathsin/landing"
-	"jathsin/web"
+	"jathsin/web/about"
+	"jathsin/web/articles"
+	"jathsin/web/projects"
 	"log/slog"
 	"net/http"
 	"os"
@@ -27,7 +29,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	web_mux, err := web.Get_mux()
+	articles_mux, err := articles.Get_mux()
+	if err != nil {
+		logger.Error("main: error in articles.Get_mux()", "error", err)
+		os.Exit(1)
+	}
+
+	projects_mux, err := projects.Get_mux()
+	if err != nil {
+		logger.Error("main: error in projects.Get_mux()", "error", err)
+		os.Exit(1)
+	}
+
+	about_mux, err := about.Get_mux()
 	if err != nil {
 		logger.Error("main: error in web.Get_mux()", "error", err)
 		os.Exit(1)
@@ -43,15 +57,33 @@ func main() {
 
 	mux.Handle("GET /{$}", landing_mux)
 
-	mux.Handle("GET /", web_mux)
+	// Canonical URL for list page: /projects (no trailing slash)
+	mux.Handle("GET /projects", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r2 := r.Clone(r.Context())
+		r2.URL.Path = "/" // make projects_mux match its own "GET /"
+		projects_mux.ServeHTTP(w, r2)
+	}))
+
+	// If someone hits /projects/ exactly, redirect to /projects, otherwise delegate to the subtree handler.
+	mux.Handle("GET /projects/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/projects/" {
+			http.Redirect(w, r, "/projects", http.StatusMovedPermanently)
+			return
+		}
+		http.StripPrefix("/projects", projects_mux).ServeHTTP(w, r)
+	}))
+
+	mux.Handle("GET /about", about_mux)
+
+	mux.Handle("GET /articles", articles_mux)
 
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	// AUTH
 	// We only handle these kind of requests, being this explicit prevents
 	// the server from processing malicious requests (DELETE, PUT...)
-	mux.Handle("GET /auth/",  http.StripPrefix("/auth", auth_mux))
-	mux.Handle("POST /auth/",  http.StripPrefix("/auth", auth_mux))
+	mux.Handle("GET /auth/", http.StripPrefix("/auth", auth_mux))
+	mux.Handle("POST /auth/", http.StripPrefix("/auth", auth_mux))
 
 	// Build server
 	server := http.Server{
@@ -76,7 +108,7 @@ func logging(next http.Handler) http.Handler {
 			"address", r.RemoteAddr,
 		)
 
-		// Attatch log data to request to later use the same log id across 
+		// Attatch log data to request to later use the same log id across
 		// packages for the same request
 		ctx := context.WithValue(r.Context(), ctx_key_logger{}, requestLogger)
 		r = r.WithContext(ctx)

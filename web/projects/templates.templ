@@ -1,0 +1,40 @@
+package projects
+
+templ projects(projects_list []Project) {
+	if len(projects_list) == 0 {
+		<section class="min-h-screen w-full flex flex-col items-center justify-center text-center font-['Jersey_10'] text-[var(--text_1)]/82">
+			<h2 class="text-2xl mt-4">No projects yet</h2>
+		</section>
+	} else {
+		<section class="mx-auto pt-30 pb-30 max-w-[1100px] min-h-screen grid gap-5 place-content-center justify-items-center grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
+			for _, project := range projects_list {
+				<a
+					href={ "/projects/" + project.Name }
+					hx-disable
+					hx-boost="false"
+					class="
+						w-full max-h-[500px] 
+						flex flex-col p-4
+						aspect-square bg-[var(--logo)]/10 rounded-[25px]
+						cursor-pointer"
+				>
+					<div id="bento-header">
+						<div id="bento-title">{ project.Name }</div>
+						<div id="bento-date">{ project.Date }</div>
+					</div>
+				</a>
+			}
+		</section>
+	}
+}
+
+templ project_canvas(name string) {
+	<section class="w-full min-h-screen pt-30 pb-30 flex items-center justify-center">
+		<div class="w-full max-w-[1100px] h-screen">
+			<iframe
+				class="block w-full h-full border-0"
+				src={ "/projects/" + name + "/canvas.html" }
+			></iframe>
+		</div>
+	</section>
+}

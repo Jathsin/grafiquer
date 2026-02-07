@@ -10,7 +10,7 @@ import (
 )
 
 // TODO: use MongoDB
-var users = map[string]string {
+var users = map[string]string{
 	"user2": "password2",
 }
 
@@ -41,7 +41,7 @@ func Get_mux() (*http.ServeMux, error) {
 
 	return mux, nil
 }
- 
+
 func sign_in_handler(w http.ResponseWriter, r *http.Request) {
 
 	var cred credentials
@@ -61,15 +61,15 @@ func sign_in_handler(w http.ResponseWriter, r *http.Request) {
 	// create session
 	session_token := uuid.NewString()
 	expires_at := time.Now().Add(120 * time.Second)
-	sessions[session_token] = session {
+	sessions[session_token] = session{
 		username: cred.Username,
-		expiry: expires_at,
+		expiry:   expires_at,
 	}
 
 	// tell browser
 	http.SetCookie(w, &http.Cookie{
-		Name: "session_token",
-		Value: session_token,
+		Name:    "session_token",
+		Value:   session_token,
 		Expires: expires_at,
 	})
 }
@@ -79,7 +79,7 @@ func welcome_handler(w http.ResponseWriter, r *http.Request) {
 	// check session validity
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		if (err == http.ErrNoCookie) {
+		if err == http.ErrNoCookie {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
@@ -93,7 +93,7 @@ func welcome_handler(w http.ResponseWriter, r *http.Request) {
 	if !exists {
 		http.Error(w, "session does not exist", http.StatusUnauthorized)
 		return
-	} 
+	}
 	if current_session.is_expired() {
 		delete(sessions, session_token)
 		http.Error(w, "session is expired", http.StatusUnauthorized)
@@ -109,7 +109,7 @@ func refresh_handler(w http.ResponseWriter, r *http.Request) {
 	// check session validity
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		if (err == http.ErrNoCookie) {
+		if err == http.ErrNoCookie {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
@@ -123,7 +123,7 @@ func refresh_handler(w http.ResponseWriter, r *http.Request) {
 	if !exists {
 		http.Error(w, "session does not exist", http.StatusUnauthorized)
 		return
-	} 
+	}
 	if current_session.is_expired() {
 		delete(sessions, session_token)
 		http.Error(w, "session is expired", http.StatusUnauthorized)
@@ -138,22 +138,21 @@ func refresh_handler(w http.ResponseWriter, r *http.Request) {
 
 	sessions[new_session_token] = session{
 		username: current_session.username,
-		expiry: expires_at,
+		expiry:   expires_at,
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name: "session_token",
-		Value: new_session_token,
+		Name:    "session_token",
+		Value:   new_session_token,
 		Expires: expires_at,
 	})
 }
 
-
-func logout_handler(w http.ResponseWriter, r *http.Request){
-// check session validity
+func logout_handler(w http.ResponseWriter, r *http.Request) {
+	// check session validity
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		if (err == http.ErrNoCookie) {
+		if err == http.ErrNoCookie {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
@@ -163,8 +162,8 @@ func logout_handler(w http.ResponseWriter, r *http.Request){
 
 	delete(sessions, cookie.Value)
 	http.SetCookie(w, &http.Cookie{
-		Name: "session_token",
-		Value: "",
+		Name:    "session_token",
+		Value:   "",
 		Expires: time.Now(),
 	})
 }

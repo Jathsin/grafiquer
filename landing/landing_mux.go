@@ -1,9 +1,10 @@
 package landing
 
 import (
-	"net/http"
-
 	"jathsin/utils"
+	"jathsin/web/ui"
+
+	"net/http"
 
 	"github.com/a-h/templ"
 )
@@ -23,5 +24,5 @@ func landing_handler(w http.ResponseWriter, r *http.Request) {
 		templ.Handler(perlin()).ServeHTTP(w, r)
 		return
 	}
-	templ.Handler(layout(perlin(), nav_bar(), nil)).ServeHTTP(w, r)
+	templ.Handler(ui.Layout(perlin(), ui.Nav_bar(), nil)).ServeHTTP(w, r)
 }
