@@ -48,7 +48,7 @@ h2 {
   margin-bottom: var(--margin-s);
 }
 
-#content,
+.content,
 li {
   font-family: "Libre Baskerville", Georgia, serif;
   font-size: 0.96rem;
@@ -56,7 +56,7 @@ li {
   color: rgba(101, 65, 7, 0.92);
 }
 
-#content {
+.content {
   margin-top: 0;
   margin-bottom: var(--margin-m);
 }

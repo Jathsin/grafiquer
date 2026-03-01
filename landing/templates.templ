@@ -4,7 +4,11 @@ templ perlin() {
 	<!-- Scrollable canvas container -->
 	<div class="relative w-full h-[100vh] overflow-y-scroll z-0">
 		<canvas id="perlinCanvas" class="sticky top-0 w-screen h-screen"></canvas>
-		<div class="pointer-events-none absolute bottom-20 items-end flex flex-col inline-flex w-fit right-30 text-[var(--text_2)]/60 text-xl select-none gap-y-1">
+		<div
+			class="hidden 
+				   md:flex flex-col gap-y-1  w-fit items-end bottom-20 right-30 absolute 
+				   text-[var(--text_2)]/60 text-xl select-none pointer-events-none"
+		>
 			// Accordion
 			<button class="pointer-events-auto flex flex-row gap-2 items-center cursor-pointer accordion">
 				<div class="w-fit px-2 font-['Jersey_10'] border-2 border-[var(--text_2)]/60">

@@ -1,6 +1,12 @@
 package projects
 
-import "strings"
+import (
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+	"strings"
+)
+
+var title_case = cases.Title(language.English)
 
 templ projects(projects_list []Project) {
 	if len(projects_list) == 0 {
@@ -13,7 +19,7 @@ templ projects(projects_list []Project) {
 		</section>
 	} else {
 		<section
-			class=" mx-auto lg:py-35 sm:py-25 max-w-[80%]
+			class=" mx-auto md:py-35 py-28 max-w-[80%]
 				 	gap-5 justify-items-center grid lg:grid-cols-[repeat(auto-fit,minmax(240px,1fr))] sm:grid-cols-1"
 		>
 			for _, project := range projects_list {
@@ -27,7 +33,7 @@ templ projects(projects_list []Project) {
 							cursor-pointer"
 				>
 					<div id="bento-header">
-						<div id="bento-title">{ strings.ReplaceAll(project.Name , "_", " ") }</div>
+						<div id="bento-title">{ title_case.String(strings.ReplaceAll(project.Name , "_", " ")) }</div>
 						<div id="bento-date">{ project.Date }</div>
 					</div>
 				</a>

@@ -21,7 +21,7 @@ class Vector2D {
 /* 
 PARAMETRIZED VALUES
 w, h := respective screen width and height
-d := distance between points
+d := grids size
 s := minimum space between dots (s >= r).
 r := radius.
 */
@@ -79,7 +79,7 @@ function build_noise_map() {
 }
 
 /*
-Build perlin noise with my tweak, where the perlish surface defines a probability field. 
+Build perlin noise with my tweak, where the perlin surface defines a probability field. 
 That is, defines areas with different densities of points. It is another way of drawing texture.
 Let´s use a logistic distribution (sigmoid) and tune desntity with a threshold.
 
@@ -99,6 +99,7 @@ function plot_perlin() {
       const x0 = Math.floor(i / d) * d;
       const y0 = Math.floor(j / d) * d;
 
+      // access gradients associated to a given point in the grid
       const top_left = new Vector2D(x0, y0);
       const top_right = new Vector2D(x0 + d, y0);
       const bottom_left = new Vector2D(x0, y0 + d);
@@ -135,6 +136,8 @@ function plot_perlin() {
 
       const sx = (i - x0) / d;
       const sy = (j - y0) / d;
+      // original interpolating function t*t*(3 - 2*t)
+      // better continuity properties t * t * t * (t * (t * 6 - 15) + 10);
       const fade = (t) => t * t * t * (t * (t * 6 - 15) + 10);
       const u = fade(sx),
         v = fade(sy);
@@ -210,6 +213,7 @@ function logistic_dist(
 
 let primary_rgba = "";
 
+// Physics
 function step(t) {
   if (!running) return;
 

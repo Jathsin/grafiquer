@@ -6,9 +6,9 @@ function main() {
   const image = new Image(); // has w and h associated
 
   const tag = document.getElementById("tag");
-  let tagValue = tag ? tag.value : "1";
+  let tagValue = tag ? tag.value : "gustavo";
   if (tagValue == "") {
-    tagValue = "1";
+    tagValue = "gustavo";
   }
   // absolute path
   image.src = "/projects/noise_filter/static/images/" + tagValue + ".jpg";

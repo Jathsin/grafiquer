@@ -85,6 +85,7 @@ func main() {
 		logger.Error("Error in server.ListenAndServe()", "error", err)
 	}
 }
+
 func logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := uuid.New().String()

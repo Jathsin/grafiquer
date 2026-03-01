@@ -398,14 +398,6 @@ document.body.addEventListener("htmx:historyRestore", () => {
   init_perlin();
 });
 
-// document.body.addEventListener("htmx:afterSwap", () => {
-//     const c = document.getElementById("perlinCanvas");
-//     if (c) {
-//         c.dataset.perlinInit = "";
-//         init_perlin();
-//     }
-// });
-
 // afterSettle provides time for the browser to compute final layout
 document.body.addEventListener("htmx:afterSettle", () => {
   const c = document.getElementById("perlinCanvas");
