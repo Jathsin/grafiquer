@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"jathsin/auth"
 	"jathsin/landing"
 	"jathsin/web/about"
 	"jathsin/web/articles"
@@ -47,12 +46,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	auth_mux, err := auth.Get_mux()
-	if err != nil {
-		logger.Error("main: error in auth.Get_mux()", "error", err)
-		os.Exit(1)
-	}
-
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /{$}", landing_mux)
@@ -78,12 +71,6 @@ func main() {
 	mux.Handle("GET /articles", articles_mux)
 
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-
-	// AUTH
-	// We only handle these kind of requests, being this explicit prevents
-	// the server from processing malicious requests (DELETE, PUT...)
-	mux.Handle("GET /auth/", http.StripPrefix("/auth", auth_mux))
-	mux.Handle("POST /auth/", http.StripPrefix("/auth", auth_mux))
 
 	// Build server
 	server := http.Server{

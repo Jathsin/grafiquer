@@ -1,25 +1,33 @@
 package projects
 
+import "strings"
+
 templ projects(projects_list []Project) {
 	if len(projects_list) == 0 {
-		<section class="min-h-screen w-full flex flex-col items-center justify-center text-center font-['Jersey_10'] text-[var(--text_1)]/82">
+		<section
+			class="	min-h-screen w-full 
+				   	flex flex-col items-center justify-center text-center 
+					font-['Jersey_10'] text-[var(--text_1)]/82"
+		>
 			<h2 class="text-2xl mt-4">No projects yet</h2>
 		</section>
 	} else {
-		<section class="mx-auto pt-30 pb-30 max-w-[1100px] min-h-screen grid gap-5 place-content-center justify-items-center grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
+		<section
+			class=" mx-auto lg:py-35 sm:py-25 max-w-[80%]
+				 	gap-5 justify-items-center grid lg:grid-cols-[repeat(auto-fit,minmax(240px,1fr))] sm:grid-cols-1"
+		>
 			for _, project := range projects_list {
 				<a
 					href={ "/projects/" + project.Name }
 					hx-disable
 					hx-boost="false"
-					class="
-						w-full max-h-[500px] 
-						flex flex-col p-4
-						aspect-square bg-[var(--logo)]/10 rounded-[25px]
-						cursor-pointer"
+					class=" w-full max-h-[500px] 
+							flex flex-col p-4
+							aspect-square bg-[var(--logo)]/10 rounded-[25px]
+							cursor-pointer"
 				>
 					<div id="bento-header">
-						<div id="bento-title">{ project.Name }</div>
+						<div id="bento-title">{ strings.ReplaceAll(project.Name , "_", " ") }</div>
 						<div id="bento-date">{ project.Date }</div>
 					</div>
 				</a>
