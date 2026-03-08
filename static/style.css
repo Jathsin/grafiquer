@@ -16,6 +16,7 @@
   /* bakground */
   --primary: rgb(248, 246, 222);
   --secondary: rgb(224, 219, 195);
+  --slider: rgb(130, 112, 68);
   --text_1: #202373ff;
   --text_2: rgb(101, 65, 7);
   --logo: rgb(175, 152, 113);
@@ -30,7 +31,6 @@ h2 {
 }
 
 h1 {
-  /* a bit smaller + calmer */
   font-size: 1.9rem;
   line-height: 1;
   font-weight: 400;
@@ -46,6 +46,13 @@ h2 {
   color: rgba(32, 35, 115, 0.72);
   margin-top: calc(var(--margin-xl) + var(--margin-s));
   margin-bottom: var(--margin-s);
+}
+
+.label {
+  font-family: "Jersey 10", system-ui, sans-serif;
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: rgba(101, 65, 7, 0.92);
 }
 
 .content,
@@ -171,7 +178,6 @@ section a:hover {
 
 .slider {
   z-index: 10;
-  width: 260px;
 }
 
 #tag {
@@ -180,4 +186,30 @@ section a:hover {
   width: 260px;
   padding: 6px 8px;
   font-size: 14px;
+}
+
+input[type="range"] {
+  appearance: none;
+  height: 4px;
+  background: var(--slider);
+  border-radius: 4px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  background: var(--slider);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  appearance: none;
+  background: var(--slider);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  cursor: pointer;
 }

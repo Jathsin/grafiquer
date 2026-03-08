@@ -43,7 +43,7 @@ func projects(projects_list []Project) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<section class=\" mx-auto md:py-35 py-28 max-w-[80%]\n\t\t\t\t \tgap-5 justify-items-center grid lg:grid-cols-[repeat(auto-fit,minmax(240px,1fr))] sm:grid-cols-1\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<section class=\" mx-auto md:py-35 py-28 max-w-[80%] lg:max-w-[30%]\n\t\t\t\t \tgap-5 justify-items-center grid lg:grid-cols-[repeat(auto-fit,minmax(240px,1fr))] sm:grid-cols-1\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
