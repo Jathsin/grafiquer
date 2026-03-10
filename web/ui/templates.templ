@@ -5,24 +5,26 @@ import "jathsin/types"
 // -----------------------------------------------------------------------------
 // Shared html components among all pages
 // -----------------------------------------------------------------------------
-templ Layout(canvas templ.Component, nav_bar templ.Component, content templ.Component, metadata types.Metadata) {
+templ Layout(canvas templ.Component, nav_bar templ.Component, content templ.Component, seo types.SEO) {
 	<!DOCTYPE html>
 	<html>
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			// SEO
-			<meta name="description" content={ metadata.Meta_description }/>
-			<meta property="og:title" content={ metadata.Meta_property_title }/>
-			<meta property="og:description" content={ metadata.Meta_property_description }/>
-			<meta property="og:url" content={ metadata.Meta_Og_URL }/>
+			<meta name="description" content={ seo.Meta_description }/>
+			<meta property="og:title" content={ seo.Meta_property_title }/>
+			<meta property="og:description" content={ seo.Meta_property_description }/>
+			<meta property="og:url" content={ seo.Meta_Og_URL }/>
 			<title>
-				if metadata.Title != "" {
-					{ metadata.Title } | grafiquer
+				if seo.Title != "" {
+					{ seo.Title } | grafiquer
 				} else {
 					grafiquer
 				}
 			</title>
+			<!-- favicon -->
+			<link rel="icon" type="image/svg+xml" href="/static/images/logo.svg"/>
 			<!-- static files -->
 			<link rel="stylesheet" href="/static/style.css"/>
 			<!-- htmx -->

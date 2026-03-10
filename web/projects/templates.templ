@@ -24,7 +24,7 @@ templ projects(projects_list []Project) {
 		>
 			for _, project := range projects_list {
 				<a
-					href={ "/projects/" + project.Name }
+					href={ templ.URL("/projects/" + project.Name) }
 					hx-disable
 					hx-boost="false"
 					class=" w-full max-h-[500px] 
@@ -42,13 +42,9 @@ templ projects(projects_list []Project) {
 	}
 }
 
-templ project_canvas(name string) {
-	<section class="w-full min-h-screen pt-30 pb-30 flex items-center justify-center">
-		<div class="w-full max-w-[1100px] h-screen">
-			<iframe
-				class="block w-full h-full border-0"
-				src={ "/projects/" + name + "/canvas.html" }
-			></iframe>
-		</div>
+// TODO: think how to pass content formatted with Goldmark
+templ project(content templ.Component) {
+	<section class="mx-auto pt-20 pb-30 max-w-[80%] md:max-w-[50%] font-['Libre_Baskerville'] text-[13px]">
+		@content
 	</section>
 }

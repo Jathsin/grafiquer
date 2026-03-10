@@ -1,9 +1,12 @@
 package projects
 
 import (
+	"jathsin/posts"
 	"jathsin/types"
 	"jathsin/utils"
 	"jathsin/web/ui"
+	"log/slog"
+
 	"net/http"
 	"os"
 	"path/filepath"
@@ -20,12 +23,10 @@ func Get_mux() (*http.ServeMux, error) {
 	mux.HandleFunc("GET /{slug}", show_project_handler)
 
 	mux.HandleFunc("GET /{slug}/static/{file...}", func(w http.ResponseWriter, r *http.Request) {
-		name := r.PathValue("name")
+		slug := r.PathValue("slug")
 		file := r.PathValue("file")
 
-		// validate name like you already do
-		// then:
-		http.ServeFile(w, r, filepath.Join("projects", name, "static", file))
+		http.ServeFile(w, r, filepath.Join("projects", slug, "static", file))
 	})
 
 	mux.HandleFunc("GET /{name}/{file...}", func(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +45,7 @@ type Project struct {
 	Date string
 }
 
-var metadata = types.Metadata{
+var seo_projects = types.SEO{
 	Title:                     "Projects",
 	Meta_description:          "Interactive graphics experiments built with WebGL, shaders, and procedural systems. Explore visual simulations, noise generators, and generative graphics.",
 	Meta_property_title:       "Graphics Projects — Grafiquer",
@@ -77,13 +78,19 @@ func projects_handler(w http.ResponseWriter, r *http.Request) {
 		templ.Handler(projects(projects_list)).ServeHTTP(w, r)
 		return
 	}
-	templ.Handler(ui.Layout(nil, ui.Nav_bar(), projects(projects_list), metadata)).ServeHTTP(w, r)
+	templ.Handler(ui.Layout(nil, ui.Nav_bar(), projects(projects_list), seo_projects)).ServeHTTP(w, r)
 }
 
 // "GET /{slug}"
 func show_project_handler(w http.ResponseWriter, r *http.Request) {
-	slug := r.PathValue("slug")
+	log := r.Context().Value(types.Ctx_key_logger{}).(*slog.Logger)
 
+	slug := r.PathValue("slug")
+	seo, content, err := posts.Get_md_from_slug(slug, "projects")
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Error("show_project_handler: error in posts.Get_md_from_slug(slug, \"projects\")", "err", err)
+	}
 	// TODO: get specific metadata for project
-	templ.Handler(ui.Layout(nil, ui.Nav_bar(), project_canvas(slug), metadata)).ServeHTTP(w, r)
+	templ.Handler(ui.Layout(nil, ui.Nav_bar(), project(content), seo.SEO)).ServeHTTP(w, r)
 }

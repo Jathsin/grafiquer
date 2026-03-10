@@ -2,7 +2,7 @@ package types
 
 import "html/template"
 
-type Post struct {
+type Post_metadata struct {
 	Title       string
 	Slug        string // endpoint
 	Parent      string // category
@@ -10,10 +10,10 @@ type Post struct {
 	Description string
 	Order       int      // to sort posts
 	Headers     []string // section names/ table of contents
-	Metadata    Metadata
+	SEO         SEO
 }
 
-type Metadata struct {
+type SEO struct {
 	// SEO fields
 	Title                     string
 	Meta_description          string // HTML tag
@@ -21,3 +21,5 @@ type Metadata struct {
 	Meta_property_description string // Social sharing
 	Meta_Og_URL               string // Canonical URL string
 }
+
+type Ctx_key_logger struct{}

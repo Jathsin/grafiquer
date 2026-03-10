@@ -20,7 +20,7 @@ func Get_mux() (*http.ServeMux, error) {
 	return mux, nil
 }
 
-var metadata = types.Metadata{
+var metadata = types.SEO{
 	Title:                     "",
 	Meta_description:          "Grafiquer is a collection of interactive computer graphics experiments, shader filters, and procedural animations exploring the intersection of math, art, and code.",
 	Meta_property_title:       "Grafiquer — Interactive Graphics Experiments",

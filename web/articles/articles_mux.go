@@ -20,7 +20,7 @@ func Get_mux() (*http.ServeMux, error) {
 	return mux, nil
 }
 
-var metadata = types.Metadata{
+var seo = types.SEO{
 	Title:                     "Projects",
 	Meta_description:          "Interactive graphics experiments built with WebGL, shaders, and procedural systems. Explore visual simulations, noise generators, and generative graphics.",
 	Meta_property_title:       "Graphics Projects — Grafiquer",
@@ -35,5 +35,5 @@ func still_working(w http.ResponseWriter, r *http.Request) {
 		templ.Handler(ui.Not_found()).ServeHTTP(w, r)
 		return
 	}
-	templ.Handler(ui.Layout(nil, ui.Nav_bar(), ui.Not_found(), metadata)).ServeHTTP(w, r)
+	templ.Handler(ui.Layout(nil, ui.Nav_bar(), ui.Not_found(), seo)).ServeHTTP(w, r)
 }

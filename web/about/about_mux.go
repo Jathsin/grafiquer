@@ -20,7 +20,7 @@ func Get_mux() (*http.ServeMux, error) {
 	return mux, nil
 }
 
-var metadata = types.Metadata{
+var seo = types.SEO{
 	Title:                     "About",
 	Meta_description:          "About Grafiquer and its creator Juan Miguel Reyes — a computer science student exploring computer graphics, procedural systems, and visual experiments.",
 	Meta_property_title:       "About Grafiquer",
@@ -33,5 +33,5 @@ func about_handler(w http.ResponseWriter, r *http.Request) {
 		templ.Handler(about()).ServeHTTP(w, r)
 		return
 	}
-	templ.Handler(ui.Layout(nil, ui.Nav_bar(), about(), metadata)).ServeHTTP(w, r)
+	templ.Handler(ui.Layout(nil, ui.Nav_bar(), about(), seo)).ServeHTTP(w, r)
 }
